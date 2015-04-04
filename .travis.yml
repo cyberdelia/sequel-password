@@ -3,7 +3,6 @@ cache: bundler
 rvm:
   - 2.2.1
 sudo: false
-bundler_args: --without development
 script: bundle exec rspec
 notifications:
   email: false
