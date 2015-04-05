@@ -2,6 +2,7 @@ require "base64"
 require "bcrypt"
 require "openssl"
 require "pbkdf2"
+require "securerandom"
 
 module Sequel
   module Plugins
