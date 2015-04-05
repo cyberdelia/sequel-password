@@ -1,3 +1,8 @@
+require "base64"
+require "bcrypt"
+require "openssl"
+require "pbkdf2"
+
 module Sequel
   module Plugins
     module Password
