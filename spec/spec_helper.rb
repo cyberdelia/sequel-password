@@ -19,7 +19,7 @@ RSpec.configure do |config|
     class DefaultUser < Sequel::Model
       set_schema do
         primary_key :id
-        varchar     :digest
+        varchar     :password
       end
 
       plugin :password
@@ -28,7 +28,7 @@ RSpec.configure do |config|
     class BCryptUser < Sequel::Model
       set_schema do
         primary_key :id
-        varchar     :digest
+        varchar     :password
       end
 
       plugin :password, hashers: { bcrypt: Sequel::Plugins::Password::BCryptHasher.new }
@@ -37,7 +37,7 @@ RSpec.configure do |config|
     class BCryptSHA256User < Sequel::Model
       set_schema do
         primary_key :id
-        varchar     :digest
+        varchar     :password
       end
 
       plugin :password, hashers: { bcrypt: Sequel::Plugins::Password::BCryptSHA256Hasher.new }

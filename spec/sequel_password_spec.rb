@@ -17,9 +17,9 @@ describe Sequel::Plugins::Password do
     before { user.password = secret }
 
     it "sets an unusable password" do
-      expect { user.set_unusable_password }.to change(user, :digest)
-      expect(user.digest).to match(/^!/)
-      expect(user.digest.length).to eq(41)
+      expect { user.set_unusable_password }.to change(user, :password)
+      expect(user.password).to match(/^!/)
+      expect(user.password.length).to eq(41)
     end
   end
 
@@ -34,18 +34,6 @@ describe Sequel::Plugins::Password do
 
     it "returns false when authentication fails" do
       expect(user.authenticate("")).to be_falsey
-    end
-
-    it "upgrade to newest hasher" do
-      user.digest = "sha1$seasalt$cff36ea83f5706ce9aa7454e63e431fc726b2dc8"
-      expect { user.authenticate(secret) }.to change(user, :digest)
-      expect(user.digest).to match(/^pbkdf2_sha256\$/)
-    end
-
-    it "upgrade to new iterations values" do
-      user.digest = "pbkdf2_sha256$20000$seasalt$oBSd886ysm3AqYun62DOdin8YcfbU1z9cksZSuLP9r0="
-      expect { user.authenticate(secret) }.to change(user, :digest)
-      expect(user.digest).to match(/^pbkdf2_sha256\$24000\$/)
     end
   end
 

@@ -1,3 +1,4 @@
+require "sequel"
 require "securerandom"
 require "sequel_password/hashers"
 
@@ -8,7 +9,7 @@ module Sequel
 
       def self.configure(model, options = {})
         model.instance_eval do
-          @column = options.fetch(:column, :digest)
+          @column = options.fetch(:column, :password)
           @hashers = options.fetch(:hashers,
             pbkdf2_sha256: PBKDF2Hasher.new,
             bcrypt_sha256: BCryptSHA256Hasher.new,
@@ -62,15 +63,18 @@ module Sequel
       module InstanceMethods
         def authenticate(password)
           encoded = send(model.column)
-          model.check_password(password, encoded, setter: method(:"password="))
+          model.check_password(password, encoded, setter: method(:"#{model.column}="))
         end
 
-        def password=(password)
-          send("#{model.column}=", model.make_password(password))
+        def []=(attr, plain)
+          if attr == model.column
+            value = model.make_password(plain)
+          end
+          super(attr, value || plain)
         end
 
         def set_unusable_password
-          send("#{model.column}=", model.make_password(nil))
+          send("#{model.column}=", nil)
         end
       end
     end

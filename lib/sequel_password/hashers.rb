@@ -52,13 +52,13 @@ module Sequel
         end
 
         def verify(password, encoded)
-          algorithm, iterations, salt, hash = encoded.split('$', 4)
+          _, iterations, salt, hash = encoded.split('$', 4)
           hash = encode(password, salt, iterations.to_i)
           constant_time_compare(encoded, hash)
         end
 
         def must_update(encoded)
-          algorithm, iterations, salt, hash = encoded.split('$', 4)
+          _, iterations, _, _ = encoded.split('$', 4)
           iterations.to_i != @iterations
         end
       end
@@ -81,7 +81,7 @@ module Sequel
         end
 
         def verify(password, encoded)
-          algorithm, data = encoded.split('$', 2)
+          _, data = encoded.split('$', 2)
           password = @digest.digest(password) unless @digest.nil?
           hash = BCrypt::Engine.hash_secret(password, data)
           constant_time_compare(data, hash)
@@ -108,7 +108,7 @@ module Sequel
         end
 
         def verify(password, encoded)
-          algorithm, salt, hash = encoded.split('$', 3)
+          _, salt, hash = encoded.split('$', 3)
           hash = encode(password, salt)
           constant_time_compare(encoded, hash)
         end
