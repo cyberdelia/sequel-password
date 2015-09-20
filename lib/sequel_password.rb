@@ -18,12 +18,23 @@ module Sequel
         end
       end
 
+      # @!attribute [r] column
+      #   @return [Symbol] name of the column where password is stored
+      # @!attribute [r] hashers
+      #   @return [Hash] hash of the algorithms and their corresponding Hasher
       module ClassMethods
         attr_reader :column, :hashers
 
         Plugins.inherited_instance_variables(self,
           "@column": :digest, "@hashers": {})
 
+        # Returns the given password hash. It will return an unusable
+        # hash if given password is nil.
+        #
+        # @param [String, nil] password to be hashed
+        # @param [String, nil] salt to be used during hashing
+        # @param [Symbol] algorithm to be used for hashing
+        # @return [String] the given password hashed
         def make_password(password, salt: nil, algorithm: :default)
           return "!#{SecureRandom.hex(20)}" if password.nil?
 
@@ -31,6 +42,10 @@ module Sequel
           hasher(algorithm).encode(password, salt)
         end
 
+        # Returns if encoded hash is a usable password.
+        #
+        # @param [String] encoded hash
+        # @return [Boolean] if password is usable
         def usable_password?(encoded)
           return false if encoded.nil? || encoded.start_with?("!")
 
@@ -38,6 +53,14 @@ module Sequel
           !hasher(algorithm).nil?
         end
 
+        # Check if password match, and upgrade to newest hashing algorithm
+        # if needed.
+        #
+        # @param [String] password in plain text
+        # @param [String] encoded password for comparision
+        # @param [Proc] setter accepting an encoded password
+        # @param [Symbol] algorithm to be used for hashing
+        # @return [Boolean] if password match encoded password
         def check_password(password, encoded, setter: nil, algorithm: :default)
           return false if password.nil? || !usable_password?(encoded)
 
@@ -61,6 +84,10 @@ module Sequel
       end
 
       module InstanceMethods
+        # Check if given password match the existing one.
+        #
+        # @param [String] password in plain text
+        # @return [Boolean] if given password match
         def authenticate(password)
           encoded = send(model.column)
           model.check_password(password, encoded, setter: method(:"#{model.column}="))
@@ -73,6 +100,7 @@ module Sequel
           super(attr, value || plain)
         end
 
+        # Sets the password as unusable.
         def set_unusable_password
           send("#{model.column}=", nil)
         end

@@ -7,22 +7,43 @@ require "securerandom"
 module Sequel
   module Plugins
     module Password
+      # @!attribute [r] algorithm
+      #   @return [Symbol] name of the alogorithm implemented by the hasher
+      # @abstract Subclass or override this class to implements a custom
+      #   Hasher.
       class Hasher
         attr_reader :algorithm
 
+        # Returns salt value to be used for hashing.
+        #
+        # @return [String] random salt value.
         def salt
           # 72 bits
           SecureRandom.hex(9)
         end
 
+        # Returns if the given password match the encoded password.
+        #
+        # @param [String] password in plain text
+        # @param [String] encoded password to be matched
+        # @return [Boolean] if password match encoded password.
         def verify(password, encoded)
           raise NotImplementedError
         end
 
+        # Returns given password encoded with the given salt.
+        #
+        # @param [String] password in plain text
+        # @param [String] salt to be used during hashing
+        # @return [String] given password hashed using the given salt
         def encode(password, salt)
           raise NotImplementedError
         end
 
+        # Returns if given encoded password needs to be updated.
+        #
+        # @param [String] encoded password
+        # @return [Boolean] if encoded password needs to be updated
         def must_update(encoded)
           false
         end
@@ -36,6 +57,8 @@ module Sequel
         end
       end
 
+      # PBKDF2Hasher implements a PBKDF2 password hasher using 24000 iterations
+      # by default.
       class PBKDF2Hasher < Hasher
         def initialize
           @algorithm = :pbkdf2_sha256
@@ -63,6 +86,7 @@ module Sequel
         end
       end
 
+      # BCryptSHA256Hasher implements a BCrypt password hasher using SHA256.
       class BCryptSHA256Hasher < Hasher
         def initialize
           @algorithm = :bcrypt_sha256
@@ -88,6 +112,7 @@ module Sequel
         end
       end
 
+      # BCryptHasher implements a BCrypt password hasher.
       class BCryptHasher < BCryptSHA256Hasher
         def initialize
           @algorithm = :bcrypt
@@ -96,6 +121,9 @@ module Sequel
         end
       end
 
+      # SHA1Hasher implements a SHA1 password hasher.
+      #
+      # @deprecated This hasher is present only for backward compatibility.
       class SHA1Hasher < Hasher
         def initialize
           @algorithm = :sha1
