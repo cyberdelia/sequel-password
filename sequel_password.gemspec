@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "sequel_password"
   gem.require_paths = ["lib"]
-  gem.version       = '0.2.0'
+  gem.version       = '0.2.1'
 
   gem.add_runtime_dependency 'sequel', '~> 4.21', '>= 4.21.0'
   gem.add_runtime_dependency 'bcrypt', '~> 3.1', '>= 3.1.10'
