@@ -2,3 +2,4 @@ coverage
 *.gem
 .yardoc
 doc/
+Gemfile.lock

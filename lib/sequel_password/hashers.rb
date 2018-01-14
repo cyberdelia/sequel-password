@@ -1,8 +1,8 @@
-require "base64"
-require "bcrypt"
-require "openssl"
-require "pbkdf2"
-require "securerandom"
+require 'base64'
+require 'bcrypt'
+require 'openssl'
+require 'pbkdf2'
+require 'securerandom'
 
 module Sequel
   module Plugins
@@ -27,7 +27,7 @@ module Sequel
         # @param [String] password in plain text
         # @param [String] encoded password to be matched
         # @return [Boolean] if password match encoded password.
-        def verify(password, encoded)
+        def verify(_password, _encoded)
           raise NotImplementedError
         end
 
@@ -36,7 +36,7 @@ module Sequel
         # @param [String] password in plain text
         # @param [String] salt to be used during hashing
         # @return [String] given password hashed using the given salt
-        def encode(password, salt)
+        def encode(_password, _salt)
           raise NotImplementedError
         end
 
@@ -44,7 +44,7 @@ module Sequel
         #
         # @param [String] encoded password
         # @return [Boolean] if encoded password needs to be updated
-        def must_update(encoded)
+        def must_update(_encoded)
           false
         end
 
@@ -53,7 +53,7 @@ module Sequel
         def constant_time_compare(a, b)
           check = a.bytesize ^ b.bytesize
           a.bytes.zip(b.bytes) { |x, y| check |= x ^ y }
-          check == 0
+          check.zero?
         end
       end
 
@@ -62,26 +62,26 @@ module Sequel
       class PBKDF2Hasher < Hasher
         def initialize
           @algorithm = :pbkdf2_sha256
-          @iterations = 24000
+          @iterations = 24_000
           @digest = OpenSSL::Digest::SHA256.new
         end
 
         def encode(password, salt, iterations = nil)
           iterations = @iterations if iterations.nil?
           hash = PBKDF2.new(password: password, salt: salt,
-            iterations: iterations, hash_function: @digest)
+                            iterations: iterations, hash_function: @digest)
           hash = Base64.strict_encode64(hash.value)
           "#{@algorithm}$#{iterations}$#{salt}$#{hash}"
         end
 
         def verify(password, encoded)
-          _, iterations, salt, hash = encoded.split('$', 4)
+          _, iterations, salt, = encoded.split('$', 4)
           hash = encode(password, salt, iterations.to_i)
           constant_time_compare(encoded, hash)
         end
 
         def must_update(encoded)
-          _, iterations, _, _ = encoded.split('$', 4)
+          _, iterations, = encoded.split('$', 4)
           iterations.to_i != @iterations
         end
       end
@@ -136,7 +136,7 @@ module Sequel
         end
 
         def verify(password, encoded)
-          _, salt, hash = encoded.split('$', 3)
+          _, salt, = encoded.split('$', 3)
           hash = encode(password, salt)
           constant_time_compare(encoded, hash)
         end

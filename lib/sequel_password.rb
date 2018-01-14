@@ -1,20 +1,20 @@
-require "sequel"
-require "securerandom"
-require "sequel_password/hashers"
+require 'sequel'
+require 'securerandom'
+require 'sequel_password/hashers'
 
 module Sequel
   module Plugins
     module Password
-      class InvalidHasherException < Exception; end
+      class InvalidHasherException < RuntimeError; end
 
       def self.configure(model, options = {})
         model.instance_eval do
           @column = options.fetch(:column, :password)
           @hashers = options.fetch(:hashers,
-            pbkdf2_sha256: PBKDF2Hasher.new,
-            bcrypt_sha256: BCryptSHA256Hasher.new,
-            bcrypt: BCryptHasher.new,
-            sha1: SHA1Hasher.new)
+                                   pbkdf2_sha256: PBKDF2Hasher.new,
+                                   bcrypt_sha256: BCryptSHA256Hasher.new,
+                                   bcrypt: BCryptHasher.new,
+                                   sha1: SHA1Hasher.new)
         end
       end
 
@@ -26,7 +26,7 @@ module Sequel
         attr_reader :column, :hashers
 
         Plugins.inherited_instance_variables(self,
-          "@column": :digest, "@hashers": {})
+                                             "@column": :digest, "@hashers": {})
 
         # Returns the given password hash. It will return an unusable
         # hash if given password is nil.
@@ -47,7 +47,7 @@ module Sequel
         # @param [String] encoded hash
         # @return [Boolean] if password is usable
         def usable_password?(encoded)
-          return false if encoded.nil? || encoded.start_with?("!")
+          return false if encoded.nil? || encoded.start_with?('!')
 
           algorithm = encoded.split('$').first
           !hasher(algorithm).nil?
@@ -68,7 +68,7 @@ module Sequel
           hasher = hasher(encoded.split('$').first)
 
           must_update = hasher.algorithm != preferred.algorithm
-          must_update = preferred.must_update(encoded) unless must_update
+          must_update ||= preferred.must_update(encoded)
 
           correct = hasher.verify(password, encoded)
           setter.call(password) if !setter.nil? && correct && must_update
@@ -94,9 +94,7 @@ module Sequel
         end
 
         def []=(attr, plain)
-          if attr == model.column
-            value = model.make_password(plain)
-          end
+          value = model.make_password(plain) if attr == model.column
           super(attr, value || plain)
         end
 

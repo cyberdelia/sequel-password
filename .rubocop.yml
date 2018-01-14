@@ -1,44 +1,32 @@
-Style/AlignHash:
-  Enabled: false
+require:
+  - rubocop-rspec
 
-Style/AlignArray:
-  Enabled: false
+AllCops:
+  TargetRubyVersion: 2.2
 
-Style/AlignParameters:
-  Enabled: false
+# Offense count: 1
+Metrics/AbcSize:
+  Max: 17
 
+# Offense count: 3
+# Configuration parameters: CountComments, ExcludedMethods.
+Metrics/BlockLength:
+  Max: 80
+
+# Offense count: 2
 Style/Documentation:
-  Enabled: false
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+    - 'lib/sequel_password.rb'
 
-Style/CaseIndentation:
-  Enabled: false
-
-Style/IndentHash:
-  Enabled: false
-
-Style/NumericLiterals:
-  Enabled: false
-
-Style/SignalException:
-  Enabled: false
-
-Style/StringLiterals:
-  Enabled: false
-
-Style/MultilineOperationIndentation:
-  Enabled: false
-
-Style/StringLiterals:
-  Enabled: false
-
+# Offense count: 3
+# Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
+# URISchemes: http, https
 Metrics/LineLength:
-  Max: 250
+  Max: 103
 
-Metrics/MethodLength:
-  Max: 250
-
-Metrics/ClassLength:
-  Max: 250
-
-Lint/UselessAssignment:
-  Enabled: false
+# Offense count: 7
+# Configuration parameters: AggregateFailuresByDefault.
+RSpec/MultipleExpectations:
+  Max: 3
